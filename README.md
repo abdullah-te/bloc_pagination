@@ -1,12 +1,12 @@
 # BlocPagination
 
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](https://github.com/abdullah-te/bloc_pagination)
 
 
 
 [![Actions Status](https://github.com/excogitatr/pagination_view/workflows/build/badge.svg)](https://github.com/abdullah-te/bloc_pagination)
-[![pub package](https://img.shields.io/pub/v/pagination_view.svg)](https://pub.dev/packages/bloc_pagination)
+[![pub package](https://img.shields.io/badge/pub-v0.0.5-blue)](https://pub.dev/packages/bloc_pagination)
 
 
 ## Installing
