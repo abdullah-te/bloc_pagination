@@ -3,4 +3,7 @@
 * Initial release for BlocPagination package.
 ## 0.0.4
 
-* Support all platform.
+* Support all platforms.
+## 0.0.5
+
+* Add example.
