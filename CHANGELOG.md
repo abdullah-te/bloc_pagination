@@ -1,3 +1,6 @@
 ## 0.0.3
 
-* TODO: Initial release for BlocPagination package.
+* Initial release for BlocPagination package.
+## 0.0.4
+
+* Support all platform.

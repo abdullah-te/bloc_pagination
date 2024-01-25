@@ -1,8 +1,14 @@
 name: bloc_pagination
 description: "Flutter package provide easiest way to handle pagination pages using flutter_bloc state management"
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/abdullah-te/bloc_pagination
-
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
 environment:
   sdk: '>=3.2.3 <4.0.0'
   flutter: ">=1.17.0"
