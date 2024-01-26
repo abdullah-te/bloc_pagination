@@ -1,43 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-
+import 'dart:math' as math;
 import '../bloc/pagination_bloc.dart';
 import '../bloc/pagination_event.dart';
 import '../bloc/pagination_state.dart';
 
 class BlocPagination<T, ErrorHandler> extends StatefulWidget {
   final PaginationBloc bloc;
-  final Widget? loader;
+  final Widget? firstPageLoader;
   final bool animateTransitions;
   final Widget? loadMoreLoader;
   final SliverGridDelegate? gridDelegate;
-  final Widget? banner;
+  //final Widget? banner;
+  final SliverAppBarDelegate? banner;
+
   final Widget? footer;
-  final bool pinned;
+  final bool bannerPinned;
   final bool footerPinned;
-  final Widget Function(BuildContext context, ErrorHandler error)? error;
   final Widget Function(BuildContext context, ErrorHandler error)?
-      loadMoreError;
+      firstPageErrorBuilder;
+  final void Function(BuildContext context, PaginationState<dynamic> state)?
+      blocListener;
+  final Widget Function(BuildContext context, ErrorHandler error)?
+      loadMoreErrorBuilder;
   final Widget? noItemFound;
   final Widget? noMoreItemFound;
-  final Widget Function(BuildContext context, T item, int index) builder;
+  final Widget Function(BuildContext context, T item, int index) itemsBuilder;
 
   const BlocPagination({
     super.key,
     required this.bloc,
     this.animateTransitions = true,
-    this.loader,
-    this.error,
+    this.firstPageLoader,
+    this.blocListener,
+    this.firstPageErrorBuilder,
     this.gridDelegate,
     this.banner,
     this.footer,
-    this.pinned = false,
+    this.bannerPinned = false,
     this.footerPinned = false,
-    required this.builder,
+    required this.itemsBuilder,
     this.noItemFound,
     this.noMoreItemFound,
-    this.loadMoreError,
+    this.loadMoreErrorBuilder,
     this.loadMoreLoader,
   });
 
@@ -48,9 +55,9 @@ class BlocPagination<T, ErrorHandler> extends StatefulWidget {
 
 class _BlocPaginationState<T, ErrorHandler>
     extends State<BlocPagination<T, ErrorHandler>> {
-  get _firstPageProgressIndicatorBuilder => widget.loader != null
+  get _firstPageProgressIndicatorBuilder => widget.firstPageLoader != null
       ? (_) {
-          return widget.loader!;
+          return widget.firstPageLoader!;
         }
       : null;
 
@@ -65,11 +72,11 @@ class _BlocPaginationState<T, ErrorHandler>
         }
       : null;
   get _noItemsFoundIndicatorBuilder => (_) {
-        return widget.noMoreItemFound ?? const Text('No Items Found');
+        return widget.noItemFound ?? const Text('No Items Found');
       };
   get _newPageErrorIndicatorBuilder => (_) {
-        if (widget.loadMoreError != null) {
-          return widget.loadMoreError!(
+        if (widget.loadMoreErrorBuilder != null) {
+          return widget.loadMoreErrorBuilder!(
               context,
               widget.bloc.state.controller.error != null
                   ? (widget.bloc.state.controller.error) as ErrorHandler
@@ -83,8 +90,8 @@ class _BlocPaginationState<T, ErrorHandler>
       };
 
   get _firstPageErrorIndicatorBuilder => (_) {
-        if (widget.error != null) {
-          return widget.error!(
+        if (widget.firstPageErrorBuilder != null) {
+          return widget.firstPageErrorBuilder!(
               context,
               widget.bloc.state.controller.error != null
                   ? (widget.bloc.state.controller.error) as ErrorHandler
@@ -103,19 +110,16 @@ class _BlocPaginationState<T, ErrorHandler>
       onRefresh: () async {
         widget.bloc.add(RefreshIndicatorEvent());
       },
-      child: BlocBuilder<PaginationBloc, PaginationState>(
+      child: BlocConsumer<PaginationBloc, PaginationState>(
         bloc: widget.bloc,
+        listener: widget.blocListener ?? (context, state) {},
         builder: (context, state) {
-          return CustomScrollView(
+          var child = CustomScrollView(
             slivers: <Widget>[
               if (widget.banner != null)
-                SliverAppBar(
-                  elevation: 0,
-                  automaticallyImplyLeading: false,
-                  pinned: widget.pinned,
-                  bottom: const PreferredSize(
-                      preferredSize: Size.fromHeight(-10.0), child: SizedBox()),
-                  flexibleSpace: widget.banner,
+                SliverPersistentHeader(
+                  pinned: widget.bannerPinned,
+                  delegate: widget.banner!,
                 ),
               switch (state.listType) {
                 ListType.listView => PagedSliverList<int, T>(
@@ -135,7 +139,7 @@ class _BlocPaginationState<T, ErrorHandler>
                           _noItemsFoundIndicatorBuilder,
                       noMoreItemsIndicatorBuilder:
                           _noMoreItemsFoundIndicatorBuilder,
-                      itemBuilder: widget.builder,
+                      itemBuilder: widget.itemsBuilder,
                     ),
                   ),
                 ListType.gridView => PagedSliverGrid<int, T>(
@@ -162,18 +166,26 @@ class _BlocPaginationState<T, ErrorHandler>
                           _noItemsFoundIndicatorBuilder,
                       noMoreItemsIndicatorBuilder:
                           _noMoreItemsFoundIndicatorBuilder,
-                      itemBuilder: widget.builder,
+                      itemBuilder: widget.itemsBuilder,
                     ),
                   ),
               },
-              if (widget.footer != null)
-                SliverFillRemaining(
-                  fillOverscroll: true,
-                  hasScrollBody: false,
+              if (widget.footer != null && !widget.footerPinned)
+                SliverToBoxAdapter(
                   child: widget.footer,
                 ),
             ],
           );
+          if (widget.footerPinned) {
+            return Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                child,
+                if (widget.footer != null) widget.footer!,
+              ],
+            );
+          }
+          return child;
         },
       ),
     );
@@ -202,5 +214,36 @@ class _ErrorWidget extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  SliverAppBarDelegate({
+    required this.minHeight,
+    required this.maxHeight,
+    required this.child,
+  });
+
+  final double minHeight;
+  final double maxHeight;
+  final Widget child;
+
+  @override
+  double get minExtent => minHeight;
+
+  @override
+  double get maxExtent => math.max(maxHeight, minHeight);
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return new SizedBox.expand(child: child);
+  }
+
+  @override
+  bool shouldRebuild(SliverAppBarDelegate oldDelegate) {
+    return maxHeight != oldDelegate.maxHeight ||
+        minHeight != oldDelegate.minHeight ||
+        child != oldDelegate.child;
   }
 }

@@ -38,22 +38,30 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         body: BlocPagination<TempModel, ErrorWrapper>(
           bloc: _bloc,
-          /*loader: const SkeletonizerWidget(
-            repeat: 5,
-            child: Card(
-              child: ListTile(
-                title: Text('Item number as title'),
-                subtitle: Text('Subtitle here'),
-                trailing: Icon(Icons.ac_unit),
-              ),
-            ),
-          ),*/
-          error: (context, error) {
+          blocListener: (context, state) {},
+          firstPageErrorBuilder: (context, error) {
             return Center(
               child: Text(error.message! ?? 'none'),
             );
           },
-          builder: (context, item, index) => InkWell(
+          bannerPinned: true,
+          banner: SliverAppBarDelegate(
+            maxHeight: 100,
+            minHeight: 100,
+            child: Container(
+              color: Colors.green,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Text('header'),
+            ),
+          ),
+          footerPinned: true,
+          footer: Container(
+            color: Colors.green,
+            height: 100,
+            width: double.infinity,
+            child: Text('index  ;;'),
+          ),
+          itemsBuilder: (context, item, index) => InkWell(
             onTap: () => _bloc.add(EditListTypePaginationEvent(
                 listType: _bloc.state.listType.isListed
                     ? ListType.gridView
@@ -83,7 +91,8 @@ class MyBloc extends PaginationBloc<TempModel> {
 
     /// throw exception as ErrorWrapper() or whatever
     //throw ErrorWrapper(message: 'error');
-    return ListedData(data: [TempModel(1)], total: 1);
+    return ListedData(
+        data: [for (int i = 0; i < 10; i++) TempModel(1)], total: 20);
   }
 }
 
