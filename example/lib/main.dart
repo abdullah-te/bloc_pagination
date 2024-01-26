@@ -60,9 +60,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     : ListType.listView)),
             child: Container(
               color: Colors.green,
-              margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
               height: 200,
-              child: Text('index  ${(item as TempModel).id}'),
+              child: Text('index  ${item.id}'),
             ),
           ),
         ));

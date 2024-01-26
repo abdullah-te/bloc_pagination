@@ -21,7 +21,7 @@ class BlocPagination<T, ErrorHandler> extends StatefulWidget {
       loadMoreError;
   final Widget? noItemFound;
   final Widget? noMoreItemFound;
-  final Widget Function(BuildContext context, dynamic item, int index) builder;
+  final Widget Function(BuildContext context, T item, int index) builder;
 
   const BlocPagination({
     super.key,
