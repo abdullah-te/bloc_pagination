@@ -1,21 +1,29 @@
+import 'package:bloc_pagination/src/pagination/presentation/pages/widgets/custom_scroll_view_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'dart:math' as math;
 import '../bloc/pagination_bloc.dart';
 import '../bloc/pagination_event.dart';
 import '../bloc/pagination_state.dart';
+import 'widgets/error_widget.dart';
+import 'widgets/sliver_app_bar_delegate.dart';
 
 class BlocPagination<T, ErrorHandler> extends StatefulWidget {
+  /// bloc instance that inherited from abstract class PaginationBloc
   final PaginationBloc bloc;
-  final Widget? firstPageLoader;
-  final bool animateTransitions;
-  final Widget? loadMoreLoader;
-  final SliverGridDelegate? gridDelegate;
-  //final Widget? banner;
-  final SliverAppBarDelegate? banner;
 
+  /// loader that appear in first page before any items appear
+  final Widget? firstPageLoader;
+
+  /// Whether status transitions should be animated.
+  final bool animateTransitions;
+
+  /// a new page's progress indicator that appear in the bottom of list.
+  final Widget? loadMoreLoader;
+
+  /// GridView option
+  final SliverGridDelegate? gridDelegate;
+
+  final SliverAppBarDelegate? banner;
   final Widget? footer;
   final bool bannerPinned;
   final bool footerPinned;
@@ -60,7 +68,6 @@ class _BlocPaginationState<T, ErrorHandler>
           return widget.firstPageLoader!;
         }
       : null;
-
   get _newPageProgressIndicatorBuilder => widget.loadMoreLoader != null
       ? (_) {
           return widget.loadMoreLoader!;
@@ -82,13 +89,12 @@ class _BlocPaginationState<T, ErrorHandler>
                   ? (widget.bloc.state.controller.error) as ErrorHandler
                   : Exception() as ErrorHandler);
         } else {
-          return _ErrorWidget(
+          return ErrorButtonWidget(
             error: widget.bloc.state.controller.error.toString(),
             reload: () => widget.bloc.state.controller.retryLastFailedRequest(),
           );
         }
       };
-
   get _firstPageErrorIndicatorBuilder => (_) {
         if (widget.firstPageErrorBuilder != null) {
           return widget.firstPageErrorBuilder!(
@@ -97,7 +103,7 @@ class _BlocPaginationState<T, ErrorHandler>
                   ? (widget.bloc.state.controller.error) as ErrorHandler
                   : Exception() as ErrorHandler);
         } else {
-          return _ErrorWidget(
+          return ErrorButtonWidget(
             error: widget.bloc.state.controller.error.toString(),
             reload: () => widget.bloc.add(RefreshIndicatorEvent()),
           );
@@ -114,67 +120,22 @@ class _BlocPaginationState<T, ErrorHandler>
         bloc: widget.bloc,
         listener: widget.blocListener ?? (context, state) {},
         builder: (context, state) {
-          var child = CustomScrollView(
-            slivers: <Widget>[
-              if (widget.banner != null)
-                SliverPersistentHeader(
-                  pinned: widget.bannerPinned,
-                  delegate: widget.banner!,
-                ),
-              switch (state.listType) {
-                ListType.listView => PagedSliverList<int, T>(
-                    pagingController:
-                        state.controller as PagingController<int, T>,
-                    builderDelegate: PagedChildBuilderDelegate<T>(
-                      firstPageErrorIndicatorBuilder:
-                          _firstPageErrorIndicatorBuilder,
-                      newPageErrorIndicatorBuilder:
-                          _newPageErrorIndicatorBuilder,
-                      animateTransitions: widget.animateTransitions,
-                      firstPageProgressIndicatorBuilder:
-                          _firstPageProgressIndicatorBuilder,
-                      newPageProgressIndicatorBuilder:
-                          _newPageProgressIndicatorBuilder,
-                      noItemsFoundIndicatorBuilder:
-                          _noItemsFoundIndicatorBuilder,
-                      noMoreItemsIndicatorBuilder:
-                          _noMoreItemsFoundIndicatorBuilder,
-                      itemBuilder: widget.itemsBuilder,
-                    ),
-                  ),
-                ListType.gridView => PagedSliverGrid<int, T>(
-                    pagingController:
-                        state.controller as PagingController<int, T>,
-                    gridDelegate: widget.gridDelegate ??
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          childAspectRatio: 100 / 150,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          crossAxisCount: 3,
-                        ),
-                    builderDelegate: PagedChildBuilderDelegate<T>(
-                      firstPageErrorIndicatorBuilder:
-                          _firstPageErrorIndicatorBuilder,
-                      newPageErrorIndicatorBuilder:
-                          _newPageErrorIndicatorBuilder,
-                      animateTransitions: widget.animateTransitions,
-                      firstPageProgressIndicatorBuilder:
-                          _firstPageProgressIndicatorBuilder,
-                      newPageProgressIndicatorBuilder:
-                          _newPageProgressIndicatorBuilder,
-                      noItemsFoundIndicatorBuilder:
-                          _noItemsFoundIndicatorBuilder,
-                      noMoreItemsIndicatorBuilder:
-                          _noMoreItemsFoundIndicatorBuilder,
-                      itemBuilder: widget.itemsBuilder,
-                    ),
-                  ),
-              },
-              if (widget.footer != null && !widget.footerPinned)
-                SliverToBoxAdapter(
-                  child: widget.footer,
-                ),
-            ],
+          var child = CustomScrollViewWidget(
+            bannerPinned: widget.bannerPinned,
+            animateTransitions: widget.animateTransitions,
+            state: state,
+            itemsBuilder: widget.itemsBuilder,
+            footerPinned: widget.footerPinned,
+            gridDelegate: widget.gridDelegate,
+            footer: widget.footer,
+            banner: widget.banner,
+            firstPageErrorIndicatorBuilder: _firstPageErrorIndicatorBuilder,
+            newPageErrorIndicatorBuilder: _newPageErrorIndicatorBuilder,
+            firstPageProgressIndicatorBuilder:
+                _firstPageProgressIndicatorBuilder,
+            newPageProgressIndicatorBuilder: _newPageProgressIndicatorBuilder,
+            noItemsFoundIndicatorBuilder: _noItemsFoundIndicatorBuilder,
+            noMoreItemsFoundIndicatorBuilder: _noMoreItemsFoundIndicatorBuilder,
           );
           if (widget.footerPinned) {
             return Stack(
@@ -189,61 +150,5 @@ class _BlocPaginationState<T, ErrorHandler>
         },
       ),
     );
-  }
-}
-
-class _ErrorWidget extends StatelessWidget {
-  final String error;
-  final Function() reload;
-  const _ErrorWidget({required this.error, required this.reload});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(error),
-        SizedBox(
-          width: 150,
-          child: ElevatedButton(
-            onPressed: reload,
-            child: const Center(
-              child: Text('reload'),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  SliverAppBarDelegate({
-    required this.minHeight,
-    required this.maxHeight,
-    required this.child,
-  });
-
-  final double minHeight;
-  final double maxHeight;
-  final Widget child;
-
-  @override
-  double get minExtent => minHeight;
-
-  @override
-  double get maxExtent => math.max(maxHeight, minHeight);
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return new SizedBox.expand(child: child);
-  }
-
-  @override
-  bool shouldRebuild(SliverAppBarDelegate oldDelegate) {
-    return maxHeight != oldDelegate.maxHeight ||
-        minHeight != oldDelegate.minHeight ||
-        child != oldDelegate.child;
   }
 }

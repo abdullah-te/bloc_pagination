@@ -7,3 +7,4 @@ export 'src/pagination/presentation/bloc/pagination_bloc.dart';
 export 'src/pagination/presentation/bloc/pagination_event.dart';
 export 'src/pagination/presentation/bloc/pagination_state.dart';
 export 'src/pagination/presentation/pages/pagination_widget.dart';
+export 'src/pagination/presentation/pages/widgets/sliver_app_bar_delegate.dart';
