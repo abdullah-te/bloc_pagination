@@ -2,9 +2,6 @@
 
 
 [![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](https://github.com/abdullah-te/bloc_pagination)
-
-
-
 [![Actions Status](https://github.com/excogitatr/pagination_view/workflows/build/badge.svg)](https://github.com/abdullah-te/bloc_pagination)
 [![pub package](https://img.shields.io/badge/pub-v0.0.5-blue)](https://pub.dev/packages/bloc_pagination)
 
@@ -25,7 +22,7 @@ import 'package:bloc_pagination/bloc_pagination.dart';
 ## Basic Usage
 
 ```dart
-    class MyBloc extends PaginationBloc {
+class MyBloc extends PaginationBloc {
   @override
   Future<ListResponse<PaginationModel>> findAll(int page,
       {AbstractQueryParameters? queryParameters}) async {
@@ -35,18 +32,48 @@ import 'package:bloc_pagination/bloc_pagination.dart';
 }
 
 class MyWidget extends StatelessWidget {
-  final MyBloc bloc = MyBloc();
+  final MyBloc _bloc = MyBloc();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocPagination<String,error>(
-        bloc: bloc,
-        builder: (BuildContext context, String item) {
-          return ListTile(
-            title: Text(item),
+      body:  BlocPagination<TempModel, ErrorWrapper>(
+        bloc: _bloc,
+        blocListener: (context, state) {},
+        firstPageErrorBuilder: (context, error) {
+          return Center(
+            child: Text(error.message.toString()),
           );
         },
+        bannerPinned: true,
+        banner: SliverAppBarDelegate(
+          maxHeight: 100,
+          minHeight: 100,
+          child: Container(
+            color: Colors.green,
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Text('header widget'),
+          ),
+        ),
+        footerPinned: true,
+        footer: Container(
+          color: Colors.green,
+          height: 100,
+          width: double.infinity,
+          child: Text('footer widget'),
+        ),
+        itemsBuilder: (context, item, index) => InkWell(
+          onTap: () => _bloc.add(EditListTypePaginationEvent(
+              listType: _bloc.state.listType.isListed
+                  ? ListType.gridView
+                  : ListType.listView)),
+          child: Container(
+            color: Colors.green,
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+            height: 200,
+            child: Text('index  ${item.id}'),
+          ),
+        ),
       ),
     );
   }

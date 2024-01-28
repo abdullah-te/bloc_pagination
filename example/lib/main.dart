@@ -41,7 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
           blocListener: (context, state) {},
           firstPageErrorBuilder: (context, error) {
             return Center(
-              child: Text(error.message! ?? 'none'),
+              child: Text(error.message.toString()),
             );
           },
           bannerPinned: true,
