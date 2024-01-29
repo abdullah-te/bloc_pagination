@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import '../../../../../bloc_pagination.dart';
-import 'sliver_app_bar_delegate.dart';
 
 class CustomScrollViewWidget<T> extends StatelessWidget {
   final SliverAppBarDelegate? banner;
@@ -19,9 +18,13 @@ class CustomScrollViewWidget<T> extends StatelessWidget {
   final SliverGridDelegate? gridDelegate;
   final Widget? footer;
   final bool footerPinned;
+  final Axis scrollDirection;
+  final ScrollPhysics? physics;
   const CustomScrollViewWidget(
       {super.key,
       this.banner,
+      this.physics,
+      required this.scrollDirection,
       required this.bannerPinned,
       required this.animateTransitions,
       required this.state,
@@ -39,6 +42,8 @@ class CustomScrollViewWidget<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
+      scrollDirection: scrollDirection,
+      physics: physics,
       slivers: <Widget>[
         if (banner != null)
           SliverPersistentHeader(
@@ -84,7 +89,7 @@ class CustomScrollViewWidget<T> extends StatelessWidget {
               ),
             ),
         },
-        if (footer != null && !footerPinned)
+        if (footer != null && footerPinned)
           SliverToBoxAdapter(
             child: footer,
           ),

@@ -1,6 +1,8 @@
+import 'package:bloc_pagination/src/core/extensions/axis_extension.dart';
 import 'package:bloc_pagination/src/pagination/presentation/pages/widgets/custom_scroll_view_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../bloc/pagination_bloc.dart';
 import '../bloc/pagination_event.dart';
 import '../bloc/pagination_state.dart';
@@ -36,12 +38,15 @@ class BlocPagination<T, ErrorHandler> extends StatefulWidget {
   final Widget? noItemFound;
   final Widget? noMoreItemFound;
   final Widget Function(BuildContext context, T item, int index) itemsBuilder;
-
+  final Axis scrollDirection;
+  final ScrollPhysics? physics;
   const BlocPagination({
     super.key,
     required this.bloc,
     this.animateTransitions = true,
+    this.scrollDirection = Axis.vertical,
     this.firstPageLoader,
+    this.physics,
     this.blocListener,
     this.firstPageErrorBuilder,
     this.gridDelegate,
@@ -120,7 +125,39 @@ class _BlocPaginationState<T, ErrorHandler>
         bloc: widget.bloc,
         listener: widget.blocListener ?? (context, state) {},
         builder: (context, state) {
-          var child = CustomScrollViewWidget(
+          if (widget.footerPinned && !widget.scrollDirection.isHorizontal) {
+            return Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                CustomScrollViewWidget(
+                  scrollDirection: widget.scrollDirection,
+                  physics: widget.physics,
+                  bannerPinned: widget.bannerPinned,
+                  animateTransitions: widget.animateTransitions,
+                  state: state,
+                  itemsBuilder: widget.itemsBuilder,
+                  footerPinned: widget.footerPinned,
+                  gridDelegate: widget.gridDelegate,
+                  footer: widget.footer,
+                  banner: widget.banner,
+                  firstPageErrorIndicatorBuilder:
+                      _firstPageErrorIndicatorBuilder,
+                  newPageErrorIndicatorBuilder: _newPageErrorIndicatorBuilder,
+                  firstPageProgressIndicatorBuilder:
+                      _firstPageProgressIndicatorBuilder,
+                  newPageProgressIndicatorBuilder:
+                      _newPageProgressIndicatorBuilder,
+                  noItemsFoundIndicatorBuilder: _noItemsFoundIndicatorBuilder,
+                  noMoreItemsFoundIndicatorBuilder:
+                      _noMoreItemsFoundIndicatorBuilder,
+                ),
+                if (widget.footer != null) widget.footer!,
+              ],
+            );
+          }
+          return CustomScrollViewWidget(
+            scrollDirection: widget.scrollDirection,
+            physics: widget.physics,
             bannerPinned: widget.bannerPinned,
             animateTransitions: widget.animateTransitions,
             state: state,
@@ -137,16 +174,6 @@ class _BlocPaginationState<T, ErrorHandler>
             noItemsFoundIndicatorBuilder: _noItemsFoundIndicatorBuilder,
             noMoreItemsFoundIndicatorBuilder: _noMoreItemsFoundIndicatorBuilder,
           );
-          if (widget.footerPinned) {
-            return Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                child,
-                if (widget.footer != null) widget.footer!,
-              ],
-            );
-          }
-          return child;
         },
       ),
     );
