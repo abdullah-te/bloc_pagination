@@ -78,6 +78,8 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class MyBloc extends PaginationBloc<TempModel> {
+  MyBloc() : super(initialType: ListType.listView);
+
   /// you can add other event, but do not forget to add super contractor
   /// such as :
   /// CategoryBloc() : super() {

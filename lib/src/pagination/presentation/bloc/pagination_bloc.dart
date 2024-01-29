@@ -9,9 +9,10 @@ import 'pagination_state.dart';
 
 abstract class PaginationBloc<T>
     extends BaseBloc<PaginationEvent, PaginationState<T>> {
-  PaginationBloc()
+  PaginationBloc({ListType initialType = ListType.listView})
       : super(PaginationState(
-            controller: PagingController<int, T>(firstPageKey: 1))) {
+            controller: PagingController<int, T>(firstPageKey: 1),
+            listType: initialType)) {
     on<InitialPaginationEvent>(_onInitialPaginationEvent);
     on<RefreshIndicatorEvent>(_onRefreshIndicatorEvent);
     on<AddItemPaginationEvent>(_onAddItemPaginationEvent);
