@@ -38,9 +38,9 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         body: BlocPagination<TempModel, ErrorWrapper>(
           bloc: _bloc,
-          physics: AlwaysScrollableScrollPhysics(),
-          scrollDirection: Axis.vertical,
-          blocListener: (context, state) {},
+          //physics: const AlwaysScrollableScrollPhysics(),
+          //scrollDirection: Axis.vertical,
+          //blocListener: (context, state) {},
           firstPageErrorBuilder: (context, error) {
             return Center(
               child: Text(error.message.toString()),
@@ -81,6 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class MyBloc extends PaginationBloc<TempModel> {
+  /// you can add initial list type (grid, list) here
   MyBloc() : super(initialType: ListType.listView);
 
   /// you can add other event, but do not forget to add super contractor
@@ -101,11 +102,13 @@ class MyBloc extends PaginationBloc<TempModel> {
   }
 }
 
+/// item model
 class TempModel {
   final int id;
   TempModel(this.id);
 }
 
+/// this model should inherit from ListResponse mixin
 class ListedData with ListResponse<TempModel> {
   @override
   List<TempModel> data;
@@ -114,6 +117,8 @@ class ListedData with ListResponse<TempModel> {
   ListedData({required this.data, this.total});
 }
 
+/// throw this model or whatever
+/// for example throw Exception
 class ErrorWrapper {
   String? message;
   int? statusCode;

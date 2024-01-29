@@ -25,21 +25,48 @@ class BlocPagination<T, ErrorHandler> extends StatefulWidget {
   /// GridView option
   final SliverGridDelegate? gridDelegate;
 
+  /// banner should require min and max height , child
   final SliverAppBarDelegate? banner;
+
+  /// nullable widget for footer
+  /// it appear as last item in the list view (screen)
   final Widget? footer;
+
+  /// default false
+  /// will stuck in the head of the screen
   final bool bannerPinned;
+
+  /// default false
+  /// will stuck in the bottom of the screen
   final bool footerPinned;
+
+  /// first page error builder widget return error
   final Widget Function(BuildContext context, ErrorHandler error)?
       firstPageErrorBuilder;
+
+  /// bloc listener
   final void Function(BuildContext context, PaginationState<dynamic> state)?
       blocListener;
+
+  /// other pages error builder widget return error
   final Widget Function(BuildContext context, ErrorHandler error)?
       loadMoreErrorBuilder;
+
+  /// widget that build when list is empty in the first page
   final Widget? noItemFound;
+
+  /// widget that build when no more item found
   final Widget? noMoreItemFound;
+
+  /// items builder
   final Widget Function(BuildContext context, T item, int index) itemsBuilder;
+
+  /// scroll direction
+  /// as default will be vertical
   final Axis scrollDirection;
+
   final ScrollPhysics? physics;
+
   const BlocPagination({
     super.key,
     required this.bloc,
