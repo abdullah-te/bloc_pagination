@@ -38,6 +38,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         body: BlocPagination<TempModel, ErrorWrapper>(
           bloc: _bloc,
+          physics: AlwaysScrollableScrollPhysics(),
+          scrollDirection: Axis.vertical,
           blocListener: (context, state) {},
           firstPageErrorBuilder: (context, error) {
             return Center(
@@ -49,17 +51,18 @@ class _MyHomePageState extends State<MyHomePage> {
             maxHeight: 100,
             minHeight: 100,
             child: Container(
-              color: Colors.green,
+              color: Colors.greenAccent,
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Text('header'),
             ),
           ),
           footerPinned: true,
           footer: Container(
-            color: Colors.green,
+            color: Colors.greenAccent,
             height: 100,
-            width: double.infinity,
-            child: Text('index  ;;'),
+            width: MediaQuery.of(context).size.width,
+            //width: double.infinity,
+            child: Text('footer'),
           ),
           itemsBuilder: (context, item, index) => InkWell(
             onTap: () => _bloc.add(EditListTypePaginationEvent(
