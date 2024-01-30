@@ -2,6 +2,7 @@ library bloc_pagination;
 
 export 'src/core/blocs/base_bloc.dart';
 export 'src/core/models/base_query.dart';
+export 'src/core/models/custom_scroll_options.dart';
 export 'src/core/models/list_response/list_response.dart';
 export 'src/pagination/presentation/bloc/pagination_bloc.dart';
 export 'src/pagination/presentation/bloc/pagination_event.dart';

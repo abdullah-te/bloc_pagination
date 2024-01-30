@@ -6,6 +6,7 @@ import '../../../../../bloc_pagination.dart';
 class CustomScrollViewWidget<T> extends StatelessWidget {
   final SliverAppBarDelegate? banner;
   final bool bannerPinned;
+  final CustomScrollOptions scrollOptions;
   final bool animateTransitions;
   final PaginationState state;
   final Widget Function(BuildContext)? firstPageErrorIndicatorBuilder;
@@ -18,13 +19,10 @@ class CustomScrollViewWidget<T> extends StatelessWidget {
   final SliverGridDelegate? gridDelegate;
   final Widget? footer;
   final bool footerPinned;
-  final Axis scrollDirection;
-  final ScrollPhysics? physics;
   const CustomScrollViewWidget(
       {super.key,
       this.banner,
-      this.physics,
-      required this.scrollDirection,
+      required this.scrollOptions,
       required this.bannerPinned,
       required this.animateTransitions,
       required this.state,
@@ -42,8 +40,14 @@ class CustomScrollViewWidget<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
-      scrollDirection: scrollDirection,
-      physics: physics,
+      scrollDirection: scrollOptions.scrollDirection,
+      physics: scrollOptions.physics,
+      controller: scrollOptions.controller,
+      shrinkWrap: scrollOptions.shrinkWrap,
+      reverse: scrollOptions.reverse,
+      dragStartBehavior: scrollOptions.dragStartBehavior,
+      keyboardDismissBehavior: scrollOptions.keyboardDismissBehavior,
+      clipBehavior: scrollOptions.clipBehavior,
       slivers: <Widget>[
         if (banner != null)
           SliverPersistentHeader(

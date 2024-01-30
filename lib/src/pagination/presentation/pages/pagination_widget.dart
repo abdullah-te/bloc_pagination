@@ -3,11 +3,8 @@ import 'package:bloc_pagination/src/pagination/presentation/pages/widgets/custom
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/pagination_bloc.dart';
-import '../bloc/pagination_event.dart';
-import '../bloc/pagination_state.dart';
+import '../../../../bloc_pagination.dart';
 import 'widgets/error_widget.dart';
-import 'widgets/sliver_app_bar_delegate.dart';
 
 class BlocPagination<T, ErrorHandler> extends StatefulWidget {
   /// bloc instance that inherited from abstract class PaginationBloc
@@ -63,17 +60,13 @@ class BlocPagination<T, ErrorHandler> extends StatefulWidget {
 
   /// scroll direction
   /// as default will be vertical
-  final Axis scrollDirection;
-
-  final ScrollPhysics? physics;
-
+  final CustomScrollOptions? scrollOptions;
   const BlocPagination({
     super.key,
     required this.bloc,
     this.animateTransitions = true,
-    this.scrollDirection = Axis.vertical,
     this.firstPageLoader,
-    this.physics,
+    this.scrollOptions,
     this.blocListener,
     this.firstPageErrorBuilder,
     this.gridDelegate,
@@ -152,13 +145,14 @@ class _BlocPaginationState<T, ErrorHandler>
         bloc: widget.bloc,
         listener: widget.blocListener ?? (context, state) {},
         builder: (context, state) {
-          if (widget.footerPinned && !widget.scrollDirection.isHorizontal) {
+          if (widget.footerPinned &&
+              !((widget.scrollOptions?.scrollDirection ??
+                      CustomScrollOptions().scrollDirection)
+                  .isHorizontal)) {
             return Stack(
               alignment: Alignment.bottomCenter,
               children: [
                 CustomScrollViewWidget(
-                  scrollDirection: widget.scrollDirection,
-                  physics: widget.physics,
                   bannerPinned: widget.bannerPinned,
                   animateTransitions: widget.animateTransitions,
                   state: state,
@@ -177,14 +171,13 @@ class _BlocPaginationState<T, ErrorHandler>
                   noItemsFoundIndicatorBuilder: _noItemsFoundIndicatorBuilder,
                   noMoreItemsFoundIndicatorBuilder:
                       _noMoreItemsFoundIndicatorBuilder,
+                  scrollOptions: widget.scrollOptions ?? CustomScrollOptions(),
                 ),
                 if (widget.footer != null) widget.footer!,
               ],
             );
           }
           return CustomScrollViewWidget(
-            scrollDirection: widget.scrollDirection,
-            physics: widget.physics,
             bannerPinned: widget.bannerPinned,
             animateTransitions: widget.animateTransitions,
             state: state,
@@ -200,6 +193,7 @@ class _BlocPaginationState<T, ErrorHandler>
             newPageProgressIndicatorBuilder: _newPageProgressIndicatorBuilder,
             noItemsFoundIndicatorBuilder: _noItemsFoundIndicatorBuilder,
             noMoreItemsFoundIndicatorBuilder: _noMoreItemsFoundIndicatorBuilder,
+            scrollOptions: widget.scrollOptions ?? CustomScrollOptions(),
           );
         },
       ),
